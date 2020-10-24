@@ -43,7 +43,7 @@ def error(update, context):
 
 
 def main():
-    //silakan gunakan token bot telegram
+    #silakan gunakan token bot telegram
     updater = Updater("TOKEN", use_context=True)
 
     dp = updater.dispatcher
