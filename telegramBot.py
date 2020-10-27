@@ -1,5 +1,6 @@
-import logging,time, requests, json
+import logging,time, requests, json, random
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from urllib import request
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -23,6 +24,7 @@ def help(update, context):
     update.message.reply_text('Berikut adalah daftar command yang bisa anda gunakan : \n\n'
                               '/help - memunculkan bantuan\n'
                               '/contact - melihat contact\n'
+                              '/joke - random joke\n'
                               '/start - memulai percakapan\n\n'
                               'Anda bisa mengetahui cuaca hari ini menggunankan perintah cuaca <kota>\n\n'
                               'Untuk saat ini fitur bot ini masih terbatas. Silakan menuju /contact untuk memberi kritik dan saran')
@@ -36,9 +38,22 @@ def contact(update, context):
                               'Telegram : https://t.me/cnugroho \n'
                               'Email : cnugroho211@gmail.com')
 
-def error(update, context):
-    logger.warning('Update "%s" caused error "%s"', update, context.error)
+def joke(update, context):
+    url = "https://official-joke-api.appspot.com/random_joke"
+    response = request.urlopen(url)
+    data = json.loads(response.read())
+    update.message.reply_text('This is joke for you')
+    update.message.reply_text(f"{data['setup']}")
+    update.message.reply_text(f"{data['punchline']}")
 
+def number(update, context):
+    nmb = random.randint(0, 100)
+    url = "http://numbersapi.com/"+str(nmb)
+    response = request.urlopen(url)
+    data = response.read().decode('utf-8')
+
+    update.message.reply_text('This is fact about number '+str(nmb))
+    update.message.reply_text(f"{data}")
 
 def echo(update, context):
     get_city = update.message.text
@@ -71,6 +86,8 @@ def echo(update, context):
     else:
         update.message.reply_text("Maaf cahyo tidak mengerti kata "+update.message.text+" silakan menuju /help untuk bantuan")
 
+def error(update, context):
+    logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def main():
     updater = Updater("TELEGRAM API", use_context=True)
@@ -80,8 +97,9 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("contact", contact))
+    dp.add_handler(CommandHandler("joke", joke))
+    dp.add_handler(CommandHandler("number", number))
     dp.add_handler(MessageHandler(Filters.text, echo))
-
     dp.add_error_handler(error)
 
     updater.start_polling()
